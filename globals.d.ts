@@ -1,6 +1,6 @@
 declare module 'bn.js';
 declare module 'ethereumjs-abi';
-declare module 'es6-promisify';
+declare module 'prompt-confirm';
 
 declare module '*.json' {
     const json: any;
@@ -44,4 +44,28 @@ declare module 'ethereumjs-util' {
             toBuffer,
             isValidAddress,
           };
+}
+
+// es6-promisify declarations
+declare function promisify(original: any, settings?: any): ((...arg: any[]) => Promise<any>);
+declare module 'es6-promisify' {
+    export = promisify;
+}
+
+// truffle-contract declarations
+declare interface ContractInstance {
+    address: string;
+}
+declare interface ContractFactory {
+    setProvider: (providerObj: any) => void;
+    deployed: () => ContractInstance;
+    at: (address: string) => ContractInstance;
+}
+declare interface Artifact {
+    abi: any;
+    networks: {[networkId: number]: any};
+}
+declare module 'truffle-contract' {
+    function contract(artifacts: Artifact): ContractFactory;
+    export = contract;
 }

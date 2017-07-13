@@ -16,6 +16,7 @@
         "./globals.d.ts",
         "./util/**/*",
         "./test/**/*",
+        "./scripts/**/*",
         "./migrations/**/*"
     ]
 }
