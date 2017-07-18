@@ -116,8 +116,6 @@ class RegistrationManager {
         const unregisteredAddresses = [];
         for (const [index, address] of addresses.entries()) {
             const isRegistered = await this.isRegistered(address);
-            const registrationStatus = isRegistered ? '🔴' : '⚪';
-            log(`Registration status: ${index}/${addresses.length} ${address} ${registrationStatus}`);
             if (!isRegistered) {
                 unregisteredAddresses.push(address);
             }
@@ -185,6 +183,11 @@ class RegistrationManager {
     let unregisteredAddresses: string[] = [];
     if (shouldFilter) {
         unregisteredAddresses = await registrationManager.getUnregisteredAddressesAsync(addresses);
+        _.map(addresses, (address: string, index: number) => {
+            const isRegistered = !_.includes(unregisteredAddresses, address);
+            const registrationStatus = isRegistered ? '🔴' : '⚪';
+            log(`Registration status: ${index}/${addresses.length} ${address} ${registrationStatus}`);
+        });
     } else {
         unregisteredAddresses = addresses;
     }
