@@ -96,7 +96,7 @@ class RegistrationManager {
         };
         return batchConfig;
     }
-    public async registerBatchOfAdresses(batch: string[], gas: number): Promise<void> {
+    public async registerBatchOfAddresses(batch: string[], gas: number): Promise<void> {
         const isRegistered = true;
         const txOpts = {from: this.registeringAddress, gas, gasPrice: this.gasPrice};
         await this.tokenDistributionWithRegistry.changeRegistrationStatuses(batch, isRegistered, txOpts);
@@ -104,7 +104,7 @@ class RegistrationManager {
     public async registerAddressesInBatches(batches: string[][], gas: number): Promise<void> {
         for (const [index, batch] of batches.entries()) {
             log(`Registered batches: ${index}/${batches.length} ✅`);
-            await this.registerBatchOfAdresses(batch, gas);
+            await this.registerBatchOfAddresses(batch, gas);
         }
         log('Registration succeeded ✅');
     };
