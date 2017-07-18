@@ -71,7 +71,7 @@ class RegistrationManager {
             return Infinity;
         }
     }
-    // Binary searches for the biggest batch size bellow the gasLimit
+    // Binary searches for the biggest batch size below the gasLimit
     public async getBatchConfigByGasLimit(gasLimit: number): Promise<BatchConfig> {
         const singleRegistrationGasUsage = await this.getGasUsageByBatchSize(1);
         if (gasLimit < singleRegistrationGasUsage) {
