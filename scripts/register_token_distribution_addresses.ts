@@ -47,8 +47,6 @@ const getRandomAddress = () => {
 
 const getRandomAddresses = (n: number) => _.times(n, getRandomAddress);
 
-const SINGLE_REGISTRATION_GAS_USAGE = 44315;
-
 class RegistrationManager {
     private tokenDistributionWithRegistry: TokenDistributionWithRegistry;
     private registeringAddress: string;
@@ -75,12 +73,13 @@ class RegistrationManager {
     }
     // Binary searches for the biggest batch size bellow the gasLimit
     public async getBatchConfigByGasLimit(gasLimit: number): Promise<BatchConfig> {
-        if (gasLimit < SINGLE_REGISTRATION_GAS_USAGE) {
+        const singleRegistrationGasUsage = await this.getGasUsageByBatchSize(1);
+        if (gasLimit < singleRegistrationGasUsage) {
             throw new Error('Your gas limit is not enough to register a single address');
         }
         let amountWeCanRegister = 1;
         let amountWeCanNotRegister = 400; // Approx 9kk gas
-        let gasUsage = SINGLE_REGISTRATION_GAS_USAGE;
+        let gasUsage = singleRegistrationGasUsage;
         while (amountWeCanNotRegister - amountWeCanRegister > 1) {
             const testAmount = Math.floor((amountWeCanRegister + amountWeCanNotRegister) / 2);
             const gas = await this.getGasUsageByBatchSize(testAmount);
