@@ -8,6 +8,10 @@ import contract = require('truffle-contract');
 import promisify = require('es6-promisify');
 import * as TokenDistributionWithRegistryArtifactsJSON from '../build/contracts/TokenDistributionWithRegistry.json';
 
+const DEFAULT_NODE_URL = 'http://localhost:8545';
+const DEFAULT_GAS_PRICE = 21000000000;
+const DEFAULT_GAS_LIMIT = 1000000;
+
 export interface TxOpts {
     from: string;
     gas?: number;
@@ -128,16 +132,16 @@ class RegistrationManager {
     const args = yargs
         .option('node_url', {
           type: 'string',
-          default: 'http://localhost:8545',
+          default: DEFAULT_NODE_URL,
         })
         .option('gas_price', {
           type: 'number',
-          default: 21000000000,
+          default: DEFAULT_GAS_PRICE,
           description: 'Gas price in wei',
         })
         .option('gas_limit', {
           type: 'number',
-          default: 1000000,
+          default: DEFAULT_GAS_LIMIT,
           describe: 'Max gas limit for every batch/transaction',
         })
         .option('batch_size', {
