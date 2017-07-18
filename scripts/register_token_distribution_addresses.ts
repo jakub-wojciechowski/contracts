@@ -90,7 +90,11 @@ class RegistrationManager {
                 amountWeCanNotRegister = testAmount;
             }
         }
-        return {size: amountWeCanRegister, gasUsage};
+        const batchConfig = {
+            size: amountWeCanRegister,
+            gasUsage,
+        };
+        return batchConfig;
     }
     public async registerBatchOfAdresses(batch: string[], gas: number): Promise<void> {
         const isRegistered = true;
