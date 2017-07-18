@@ -58,7 +58,7 @@ class RegistrationManager {
         this.registeringAddress = registeringAddress;
         this.gasPrice = gasPrice;
     }
-    public async getGasUsageByBatchSize(batchSize: number) {
+    public async getGasUsageByBatchSizeAsync(batchSize: number): Promise<number> {
         const isRegistered = true;
         const addresses = getRandomAddresses(batchSize);
         const txOpts = {from: this.registeringAddress};
@@ -72,8 +72,8 @@ class RegistrationManager {
         }
     }
     // Binary searches for the biggest batch size below the gasLimit
-    public async getBatchConfigByGasLimit(gasLimit: number): Promise<BatchConfig> {
-        const singleRegistrationGasUsage = await this.getGasUsageByBatchSize(1);
+    public async getBatchConfigByGasLimitAsync(gasLimit: number): Promise<BatchConfig> {
+        const singleRegistrationGasUsage = await this.getGasUsageByBatchSizeAsync(1);
         if (gasLimit < singleRegistrationGasUsage) {
             throw new Error('Your gas limit is not enough to register a single address');
         }
@@ -82,7 +82,7 @@ class RegistrationManager {
         let gasUsage = singleRegistrationGasUsage;
         while (amountWeCanNotRegister - amountWeCanRegister > 1) {
             const testAmount = Math.floor((amountWeCanRegister + amountWeCanNotRegister) / 2);
-            const gas = await this.getGasUsageByBatchSize(testAmount);
+            const gas = await this.getGasUsageByBatchSizeAsync(testAmount);
             if (gas <= gasLimit) {
                 amountWeCanRegister = testAmount;
                 gasUsage = gas;
@@ -96,15 +96,15 @@ class RegistrationManager {
         };
         return batchConfig;
     }
-    public async registerBatchOfAddresses(batch: string[], gas: number): Promise<void> {
+    public async registerBatchOfAddressesAsync(batch: string[], gas: number): Promise<void> {
         const isRegistered = true;
         const txOpts = {from: this.registeringAddress, gas, gasPrice: this.gasPrice};
         await this.tokenDistributionWithRegistry.changeRegistrationStatuses(batch, isRegistered, txOpts);
     }
-    public async registerAddressesInBatches(batches: string[][], gas: number): Promise<void> {
+    public async registerAddressesInBatchesAsync(batches: string[][], gas: number): Promise<void> {
         for (const [index, batch] of batches.entries()) {
             log(`Registered batches: ${index}/${batches.length} ✅`);
-            await this.registerBatchOfAddresses(batch, gas);
+            await this.registerBatchOfAddressesAsync(batch, gas);
         }
         log('Registration succeeded ✅');
     };
@@ -112,7 +112,7 @@ class RegistrationManager {
         const isRegistered = await this.tokenDistributionWithRegistry.registered.call(address);
         return isRegistered;
     }
-    public async getUnregisteredAddresses(addresses: string[]): Promise<string[]> {
+    public async getUnregisteredAddressesAsync(addresses: string[]): Promise<string[]> {
         const unregisteredAddresses = [];
         for (const [index, address] of addresses.entries()) {
             const isRegistered = await this.isRegistered(address);
@@ -167,14 +167,14 @@ class RegistrationManager {
     let batchConfig;
     if (!_.isUndefined(args.batch_size)) {
         const batchSize = Number(args.batch_size);
-        const gasUsage = await registrationManager.getGasUsageByBatchSize(batchSize);
+        const gasUsage = await registrationManager.getGasUsageByBatchSizeAsync(batchSize);
         batchConfig = {
             size: batchSize,
             gasUsage,
         };
     } else {
         log('Calculating the batch size');
-        batchConfig = await registrationManager.getBatchConfigByGasLimit(args.gas_limit);
+        batchConfig = await registrationManager.getBatchConfigByGasLimitAsync(args.gas_limit);
     }
     log(`Batch size: ${batchConfig.size}. Gas per batch ${batchConfig.gasUsage}`);
     const addresses = JSON.parse(fs.readFileSync(args.file_path).toString());
@@ -184,7 +184,7 @@ class RegistrationManager {
     const shouldFilter = await filteringPrompt.run();
     let unregisteredAddresses: string[] = [];
     if (shouldFilter) {
-        unregisteredAddresses = await registrationManager.getUnregisteredAddresses(addresses);
+        unregisteredAddresses = await registrationManager.getUnregisteredAddressesAsync(addresses);
     } else {
         unregisteredAddresses = addresses;
     }
@@ -198,5 +198,5 @@ class RegistrationManager {
     if (!shouldRun) {
         return;
     }
-    await registrationManager.registerAddressesInBatches(batches, batchConfig.gasUsage);
+    await registrationManager.registerAddressesInBatchesAsync(batches, batchConfig.gasUsage);
 })().catch(log);
