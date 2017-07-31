@@ -22,6 +22,9 @@ interface TokenSale extends ContractInstance {
         (addresses: string[], isregistered: boolean, txOpts: TxOpts): Promise<void>;
         estimateGas: (addresses: string[], isregistered: boolean, txOpts: TxOpts) => Promise<number>;
     };
+    isSaleInitialized: {
+        call: () => Promise<boolean>;
+    };
     registered: {
         call: (address: string) => Promise<boolean>;
     };
@@ -162,6 +165,12 @@ class RegistrationManager {
     const contractFactory = contract(tokenSaleArtifacts);
     contractFactory.setProvider(provider);
     const tokenSale = await contractFactory.deployed() as TokenSale;
+
+    const isSaleInitialized = await tokenSale.isSaleInitialized.call();
+    if (isSaleInitialized) {
+        const err = new Error('Sale already initialized. Cannot register any more addresses.');
+        throw err;
+    }
 
     const registeringAddress = await tokenSale.owner.call();
     const registrationManager = new RegistrationManager(
