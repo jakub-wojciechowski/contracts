@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import * as Confirm from 'prompt-confirm';
 import contract = require('truffle-contract');
 import promisify = require('es6-promisify');
-import * as TokenDistributionWithRegistryArtifactsJSON from '../build/contracts/TokenDistributionWithRegistry.json';
+import * as TokenSale from '../build/contracts/TokenSale.json';
 
 const DEFAULT_NODE_URL = 'http://localhost:8545';
 const DEFAULT_GAS_PRICE = 21000000000;
@@ -158,14 +158,14 @@ class RegistrationManager {
     const NODE_URL = args.node_url;
     log(`Using node: ${NODE_URL}`);
     const provider = new Web3.providers.HttpProvider(NODE_URL);
-    const tokenDistributionWithRegistryArtifacts = TokenDistributionWithRegistryArtifactsJSON as any as Artifact;
-    const contractFactory = contract(tokenDistributionWithRegistryArtifacts);
+    const tokenSaleArtifacts = TokenSale as any as Artifact;
+    const contractFactory = contract(tokenSaleArtifacts);
     contractFactory.setProvider(provider);
-    const tokenDistributionWithRegistry = await contractFactory.deployed() as TokenDistributionWithRegistry;
+    const tokenSale = await contractFactory.deployed() as TokenDistributionWithRegistry;
 
-    const registeringAddress = await tokenDistributionWithRegistry.owner.call();
+    const registeringAddress = await tokenSale.owner.call();
     const registrationManager = new RegistrationManager(
-        tokenDistributionWithRegistry, registeringAddress, args.gas_price);
+        tokenSale, registeringAddress, args.gas_price);
     let batchConfig;
     if (!_.isUndefined(args.batch_size)) {
         const batchSize = Number(args.batch_size);
