@@ -40,7 +40,7 @@
     "solc": "^0.4.11",
     "truffle": "3.4.3",
     "typescript": "^2.2.2",
-    "web3-typescript-typings": "0.0.3"
+    "web3-typescript-typings": "^0.3.0"
   },
   "dependencies": {
     "bignumber.js": "^4.0.0",
@@ -50,9 +50,12 @@
     "ethereumjs-abi": "^0.6.4",
     "ethereumjs-util": "^5.1.1",
     "lodash": "^4.17.4",
+    "prompt-confirm": "^1.2.0",
     "request": "^2.81.0",
     "request-promise-native": "^1.0.3",
+    "truffle-contract": "^2.0.4",
     "tslint": "^4.5.1",
-    "tslint-config-0xproject": "^0.0.2"
+    "tslint-config-0xproject": "^0.0.2",
+    "web3": "0.20.0"
   }
 }
