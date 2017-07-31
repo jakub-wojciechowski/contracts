@@ -17,7 +17,7 @@ export interface TxOpts {
     gas?: number;
 }
 
-interface TokenDistributionWithRegistry extends ContractInstance {
+interface TokenSale extends ContractInstance {
     changeRegistrationStatuses: {
         (addresses: string[], isregistered: boolean, txOpts: TxOpts): Promise<void>;
         estimateGas: (addresses: string[], isregistered: boolean, txOpts: TxOpts) => Promise<number>;
@@ -52,13 +52,13 @@ const getRandomAddress = () => {
 const getRandomAddresses = (n: number) => _.times(n, getRandomAddress);
 
 class RegistrationManager {
-    private tokenDistributionWithRegistry: TokenDistributionWithRegistry;
+    private tokenSale: TokenSale;
     private registeringAddress: string;
     private gasPrice: number;
-    constructor(tokenDistributionWithRegistry: TokenDistributionWithRegistry,
+    constructor(tokenSale: TokenSale,
                 registeringAddress: string,
                 gasPrice: number) {
-        this.tokenDistributionWithRegistry = tokenDistributionWithRegistry;
+        this.tokenSale = tokenSale;
         this.registeringAddress = registeringAddress;
         this.gasPrice = gasPrice;
     }
@@ -67,7 +67,7 @@ class RegistrationManager {
         const addresses = getRandomAddresses(batchSize);
         const txOpts = {from: this.registeringAddress};
         try {
-            const gasUsage = await this.tokenDistributionWithRegistry.changeRegistrationStatuses.estimateGas(
+            const gasUsage = await this.tokenSale.changeRegistrationStatuses.estimateGas(
                addresses, isRegistered, txOpts);
             return gasUsage;
         } catch (e) {
@@ -103,7 +103,7 @@ class RegistrationManager {
     public async registerBatchOfAddressesAsync(batch: string[], gas: number): Promise<void> {
         const isRegistered = true;
         const txOpts = {from: this.registeringAddress, gas, gasPrice: this.gasPrice};
-        await this.tokenDistributionWithRegistry.changeRegistrationStatuses(batch, isRegistered, txOpts);
+        await this.tokenSale.changeRegistrationStatuses(batch, isRegistered, txOpts);
     }
     public async registerAddressesInBatchesAsync(batches: string[][], gas: number): Promise<void> {
         for (const [index, batch] of batches.entries()) {
@@ -113,7 +113,7 @@ class RegistrationManager {
         log('Registration succeeded ✅');
     };
     public async isRegistered(address: string): Promise<boolean> {
-        const isRegistered = await this.tokenDistributionWithRegistry.registered.call(address);
+        const isRegistered = await this.tokenSale.registered.call(address);
         return isRegistered;
     }
     public async getUnregisteredAddressesAsync(addresses: string[]): Promise<string[]> {
@@ -161,7 +161,7 @@ class RegistrationManager {
     const tokenSaleArtifacts = TokenSale as any as Artifact;
     const contractFactory = contract(tokenSaleArtifacts);
     contractFactory.setProvider(provider);
-    const tokenSale = await contractFactory.deployed() as TokenDistributionWithRegistry;
+    const tokenSale = await contractFactory.deployed() as TokenSale;
 
     const registeringAddress = await tokenSale.owner.call();
     const registrationManager = new RegistrationManager(
