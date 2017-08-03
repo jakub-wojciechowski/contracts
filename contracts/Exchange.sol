@@ -490,22 +490,14 @@ contract Exchange is SafeMath {
         constant
         returns (bool)
     {
-        if (mulmod(target, numerator, denominator) == 0) return false; // No rounding error.
-        // (numerator * target / denumerator) * 1000000
-        uint partialAmountWithErr = safeMul(getPartialAmount(numerator, denominator, target), 1000000);
-        // (numerator * target * 1000000 / denumerator)
-        uint partialAmountWithoutErr = safeDiv(
-            safeMul(
-                safeMul(numerator, target),
-                1000000
-            ),
-            denominator
+        uint remainder = mulmod(target, numerator, denominator);
+        if (remainder == 0) return false; // No rounding error.
+
+        uint errPercentageTimes1000000 = safeDiv(
+            safeMul(remainder, 1000000),
+            safeMul(numerator, target)
         );
-        uint errPercentageTimes1000 = safeDiv(
-            safeSub(partialAmountWithoutErr, partialAmountWithErr), // Absolute rounding error, times 1,000,000
-            safeDiv(partialAmountWithoutErr, 1000)                  // Amount being filled, times 1,000
-        );
-        return errPercentageTimes1000 > 1;
+        return errPercentageTimes1000000 > 1000;
     }
 
     /// @dev Calculates partial value given a numerator and denominator.
@@ -560,7 +552,7 @@ contract Exchange is SafeMath {
     /// @return Predicted result of transfers.
     function isTransferable(Order order, uint fillTakerTokenAmount)
         internal
-        constant
+        constant  // The called token contracts may attempt to change state, but will not be able to due to gas limits on getBalance and getAllowance.
         returns (bool)
     {
         address taker = msg.sender;
@@ -601,7 +593,7 @@ contract Exchange is SafeMath {
     /// @return Token balance of owner.
     function getBalance(address token, address owner)
         internal
-        constant
+        constant  // The called token contract may attempt to change state, but will not be able to due to an added gas limit.
         returns (uint)
     {
         return Token(token).balanceOf.gas(EXTERNAL_QUERY_GAS_LIMIT)(owner); // Limit gas to prevent reentrancy
@@ -613,7 +605,7 @@ contract Exchange is SafeMath {
     /// @return Allowance of token given to TokenTransferProxy by owner.
     function getAllowance(address token, address owner)
         internal
-        constant
+        constant  // The called token contract may attempt to change state, but will not be able to due to an added gas limit.
         returns (uint)
     {
         return Token(token).allowance.gas(EXTERNAL_QUERY_GAS_LIMIT)(owner, TOKEN_TRANSFER_PROXY_CONTRACT); // Limit gas to prevent reentrancy
